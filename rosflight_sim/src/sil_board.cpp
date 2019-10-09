@@ -199,10 +199,21 @@ bool SIL_Board::imu_read(float accel[3], float* temperature, float gyro[3], uint
 
   // this is James' egregious hack to overcome wild imu while sitting on the ground
   if (GZ_COMPAT_GET_LENGTH(current_vel) < 0.05)
+  {
     y_acc = q_I_NWU.RotateVectorReverse(-gravity_);
+//    std::cout << "GAZ Y ACC (SOLO): " << y_acc << std::endl; // ----
+  }
   else
-    y_acc = q_I_NWU.RotateVectorReverse(GZ_COMPAT_GET_WORLD_LINEAR_ACCEL(link_) - gravity_);
+  {
+    GazeboVector total_acc_UAV = GZ_COMPAT_GET_WORLD_LINEAR_ACCEL(link_) - gravity_;
+    // GazeboVector urot = q_I_NWU.RotateVectorReverse(GazeboVector(0., 0., 1.)); // ----
+    y_acc = q_I_NWU.RotateVectorReverse(total_acc_UAV);
 
+    // std::cout << "GAZ QUAT: " << q_I_NWU.W() << "\t" << q_I_NWU.X() << "\t" << q_I_NWU.Y() << "\t" << q_I_NWU.Z() << std::endl; // ----
+    // std::cout << "GAZ OPND: " << total_acc_UAV.X() << "\t" << total_acc_UAV.Y() << "\t" << total_acc_UAV.Z() << std::endl; // ----
+    // std::cout << "GAZ UROT: " << urot.X() << "\t" << urot.Y() << "\t" << urot.Z() << std::endl; // ----
+    // std::cout << "GAZ REST: " << y_acc.X() << "\t" << y_acc.Y() << "\t" << y_acc.Z() << std::endl; // ----
+  }
   // Apply normal noise (only if armed, because most of the noise comes from motors
   if (motors_spinning())
   {

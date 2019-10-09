@@ -45,10 +45,13 @@
 
 #include <rosflight/rosflight_io.h>
 
+//#include <iostream> // ----
+
 namespace rosflight_io
 {
 rosflightIO::rosflightIO()
 {
+  acl_command_sub_ = nh_.subscribe("acl_command", 1, &rosflightIO::aclCommandCallback, this);
   command_sub_ = nh_.subscribe("command", 1, &rosflightIO::commandCallback, this);
   aux_command_sub_ = nh_.subscribe("aux_command", 1, &rosflightIO::auxCommandCallback, this);
   attitude_sub_ = nh_.subscribe("attitude_correction", 1, &rosflightIO::attitudeCorrectionCallback, this);
@@ -65,7 +68,7 @@ rosflightIO::rosflightIO()
   calibrate_rc_srv_ = nh_.advertiseService("calibrate_rc_trim", &rosflightIO::calibrateRCTrimSrvCallback, this);
   reboot_srv_ = nh_.advertiseService("reboot", &rosflightIO::rebootSrvCallback, this);
   reboot_bootloader_srv_ = nh_.advertiseService("reboot_to_bootloader", &rosflightIO::rebootToBootloaderSrvCallback, this);
-  
+
   ros::NodeHandle nh_private("~");
 
   if (nh_private.param<bool>("udp", false))
@@ -138,67 +141,89 @@ rosflightIO::~rosflightIO()
 
 void rosflightIO::handle_mavlink_message(const mavlink_message_t &msg)
 {
+//  std::cout << "GOT MESSAGE FROM BOARD:" << std::endl; // ----
   switch (msg.msgid)
   {
     case MAVLINK_MSG_ID_HEARTBEAT:
+//    std::cout << "HEARTBEAT FROM BOARD" << std::endl; // ----
       handle_heartbeat_msg(msg);
       break;
     case MAVLINK_MSG_ID_ROSFLIGHT_STATUS:
+//    std::cout << "ROSFLIGHT STATUS FROM BOARD" << std::endl; // ----
       handle_status_msg(msg);
       break;
     case MAVLINK_MSG_ID_ROSFLIGHT_CMD_ACK:
+//    std::cout << "RF CMD ACK FROM BOARD" << std::endl; // ----
       handle_command_ack_msg(msg);
       break;
     case MAVLINK_MSG_ID_STATUSTEXT:
+//    std::cout << "STATUSTEXT FROM BOARD" << std::endl; // ----
       handle_statustext_msg(msg);
       break;
     case MAVLINK_MSG_ID_ATTITUDE_QUATERNION:
+//    std::cout << "ATTITUDE QUATERNION FROM BOARD" << std::endl; // ----
       handle_attitude_quaternion_msg(msg);
       break;
     case MAVLINK_MSG_ID_SMALL_IMU:
+//    std::cout << "SMALL IMU FROM BOARD" << std::endl; // ----
       handle_small_imu_msg(msg);
       break;
     case MAVLINK_MSG_ID_SMALL_MAG:
+//    std::cout << "SMALL MAG FROM BOARD" << std::endl; // ----
       handle_small_mag_msg(msg);
       break;
     case MAVLINK_MSG_ID_ROSFLIGHT_OUTPUT_RAW:
+//    std::cout << "RF OUTPUT RAW FROM BOARD" << std::endl; // ----
       handle_rosflight_output_raw_msg(msg);
       break;
     case MAVLINK_MSG_ID_RC_CHANNELS:
+//    std::cout << "RC CHANNELS FROM BOARD" << std::endl; // ----
       handle_rc_channels_raw_msg(msg);
       break;
     case MAVLINK_MSG_ID_DIFF_PRESSURE:
+//    std::cout << "DIFF PRESSURE FROM BOARD" << std::endl; // ----
       handle_diff_pressure_msg(msg);
       break;
     case MAVLINK_MSG_ID_NAMED_VALUE_INT:
+//    std::cout << "NAMED VALUE INT FROM BOARD" << std::endl; // ----
       handle_named_value_int_msg(msg);
       break;
     case MAVLINK_MSG_ID_NAMED_VALUE_FLOAT:
+//    std::cout << "NAMED VALUE FLOAT FROM BOARD" << std::endl; // ----
       handle_named_value_float_msg(msg);
       break;
     case MAVLINK_MSG_ID_NAMED_COMMAND_STRUCT:
+//    std::cout << "NAMED COMMAND STRUCT FROM BOARD" << std::endl; // ----
       handle_named_command_struct_msg(msg);
       break;
     case MAVLINK_MSG_ID_SMALL_BARO:
+//    std::cout << "SMALL BARO FROM BOARD" << std::endl; // ----
       handle_small_baro_msg(msg);
       break;
     case MAVLINK_MSG_ID_SMALL_RANGE:
+//    std::cout << "SMALL RANGE FROM BOARD" << std::endl; // ----
       handle_small_range_msg(msg);
       break;
     case MAVLINK_MSG_ID_ROSFLIGHT_GNSS:
+//    std::cout << "ROSFLIGHT GNSS FROM BOARD" << std::endl; // ----
       handle_rosflight_gnss_msg(msg);
       break;
     case MAVLINK_MSG_ID_ROSFLIGHT_GNSS_RAW:
+//    std::cout << "ROSFLIGHT GNSS RAW FROM BOARD" << std::endl; // ----
       handle_rosflight_gnss_raw_msg(msg);
       break;
     case MAVLINK_MSG_ID_ROSFLIGHT_VERSION:
+//    std::cout << "ROSFLIGHT VERSION FROM BOARD" << std::endl; // ----
       handle_version_msg(msg);
       break;
     case MAVLINK_MSG_ID_PARAM_VALUE:
+//    std::cout << "PARAM VALUE FROM BOARD" << std::endl; // ----
     case MAVLINK_MSG_ID_TIMESYNC:
+//    std::cout << "TIMESYNC FROM BOARD" << std::endl; // ----
       // silently ignore (handled elsewhere)
       break;
     case MAVLINK_MSG_ID_ROSFLIGHT_HARD_ERROR:
+//    std::cout << "RF HARD ERROR FROM BOARD" << std::endl; // ----
       handle_hard_error_msg(msg);
       break;
     default:
@@ -667,7 +692,7 @@ void rosflightIO::handle_small_range_msg(const mavlink_message_t &msg)
     case ROSFLIGHT_RANGE_LIDAR:
       alt_msg.radiation_type  = sensor_msgs::Range::INFRARED;
       alt_msg.field_of_view   = .0349066; //approx 2 deg
-      
+
       if (lidar_pub_.getTopic().empty())
       {
         lidar_pub_ = nh_.advertise<sensor_msgs::Range>("lidar", 1);
@@ -830,6 +855,34 @@ void rosflightIO::handle_rosflight_gnss_raw_msg(const mavlink_message_t &msg) {
   gnss_raw_pub_.publish(msg_out);
 }
 
+void rosflightIO::aclCommandCallback(rosflight_msgs::QuadAttCmdConstPtr msg)
+{
+//  float qw_c = msg->att.w;
+//  float qx_c = msg->att.x;
+//  float qy_c = msg->att.y;
+//  float qz_c = msg->att.z;
+  float qc[4]; // = {msg->att.w, msg->att.x, msg->att.y, msg->att.z};
+  qc[0] = msg->att.w;
+  qc[1] = msg->att.x;
+  qc[2] = msg->att.y;
+  qc[3] = msg->att.z;
+
+  float p_c = msg->rate.x;
+  float q_c = msg->rate.y;
+  float r_c = msg->rate.z;
+
+  float throttle_c = msg->throttle;
+  uint32_t att_status = msg->att_status;
+
+//  std::cout << "acl command msg: " << "[p: " << p_c << ", q: " << q_c << ", r: " << r_c << "]" << std::endl;
+  mavlink_message_t mavlink_msg;
+//  mavlink_msg_attitude_quaternion_pack(1, 50, &mavlink_msg, 0, qw_c, qx_c, qy_c, qz_c, p_c, q_c, r_c);
+//  mavlink_msg_acl_command_pack(1, 50, &mavlink_msg, att_status, throttle_c, qw_c, qx_c, qy_c, qz_c, p_c, q_c, r_c);
+  mavlink_msg_attitude_target_pack(1, 50, &mavlink_msg, 0, att_status, qc, p_c, q_c, r_c, throttle_c);
+  mavrosflight_->comm.send_message(mavlink_msg);
+//  std::cout << "sent SNAP command message through the mavlink pipe" << std::endl;
+}
+
 void rosflightIO::commandCallback(rosflight_msgs::Command::ConstPtr msg)
 {
   //! \todo these are hard-coded to match right now; may want to replace with something more robust
@@ -860,6 +913,7 @@ void rosflightIO::commandCallback(rosflight_msgs::Command::ConstPtr msg)
   mavlink_message_t mavlink_msg;
   mavlink_msg_offboard_control_pack(1, 50, &mavlink_msg, mode, ignore, x, y, z, F);
   mavrosflight_->comm.send_message(mavlink_msg);
+//  std::cout << "sent ROSFLIGHT command message through the mavlink pipe" << std::endl;
 }
 
 void rosflightIO::auxCommandCallback(rosflight_msgs::AuxCommand::ConstPtr msg)

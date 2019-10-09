@@ -35,7 +35,7 @@
  */
 
 #include <rosflight_firmware/udp_board.h>
-#include <iostream>
+//#include <iostream>
 
 using boost::asio::ip::udp;
 
@@ -138,7 +138,10 @@ uint8_t UDPBoard::serial_read()
 
 void UDPBoard::async_read()
 {
-  if (!socket_.is_open()) return;
+  if (!socket_.is_open()) {
+//    std::cout << "NOT OPEN." << std::endl; // ----
+    return;
+  }
 
   MutexLock lock(read_mutex_);
   socket_.async_receive_from(boost::asio::buffer(read_buffer_, MAVLINK_MAX_PACKET_LEN),

@@ -80,7 +80,8 @@ config['Taranis'][Channel.RUD] = lambda j: j.get_axis(3)
 config['Taranis'][Channel.SW1] = lambda j: j.get_axis(4)
 config['Taranis'][Channel.SW2] = lambda j: j.get_axis(5)
 config['Taranis'][Channel.SW3] = lambda j: j.get_axis(6)
-config['Taranis'][Channel.SW4] = lambda j: 0.0 # lambda j: j.get_axis(7)
+# config['Taranis'][Channel.SW4] = lambda j: j.get_axis(7)
+config['Taranis'][Channel.SW4] = lambda j: 0.0
 
 config['XBox'] = {}
 config['XBox']['keys'] = ['Xbox', 'X-Box']
@@ -125,6 +126,10 @@ if __name__ == '__main__':
 
     # detect joystick/controller type
     rospy.loginfo("Joystick: %s" % joy.get_name())
+    rospy.loginfo("\tAxes: %d" % joy.get_numaxes())
+    rospy.loginfo("\tBalls: %d" % joy.get_numballs())
+    rospy.loginfo("\tButtons: %d" % joy.get_numbuttons())
+    rospy.loginfo("\tHats: %d" % joy.get_numhats())
 
     joy_type = None
     for k in config.keys():
@@ -139,6 +144,9 @@ if __name__ == '__main__':
         quit()
 
     rospy.loginfo("Using %s config" % joy_type)
+
+    # numaxes = joy.get_numaxes()
+    # numbuttons = joy.get_numbuttons()
 
     # main loop
     update_freq = 50 # Hz

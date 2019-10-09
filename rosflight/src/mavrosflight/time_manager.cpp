@@ -36,6 +36,8 @@
 
 #include <rosflight/mavrosflight/time_manager.h>
 
+//#include <iostream> // ----
+
 namespace mavrosflight
 {
 
@@ -56,6 +58,8 @@ void TimeManager::handle_mavlink_message(const mavlink_message_t &msg)
 {
   int64_t now_ns = ros::Time::now().toNSec();
 
+//  std::cout << "ROS NOW NS: " << now_ns << std::endl;
+
   if (msg.msgid == MAVLINK_MSG_ID_TIMESYNC)
   {
     mavlink_timesync_t tsync;
@@ -69,7 +73,7 @@ void TimeManager::handle_mavlink_message(const mavlink_message_t &msg)
       {
         offset_ns_ = offset_ns;
         ROS_INFO("Detected time offset of %0.3f s.", offset_ns/1e9);
-        ROS_DEBUG("FCU time: %0.3f, System time: %0.3f", tsync.tc1*1e-9, tsync.ts1*1e-9);
+        ROS_INFO("Req time: %0.3f, Res time: %0.3f, Now time: %0.3f", tsync.ts1*1e-9, tsync.tc1*1e-9, now_ns*1e-9);
         initialized_ = true;
       }
       else // otherwise low-pass filter the offset

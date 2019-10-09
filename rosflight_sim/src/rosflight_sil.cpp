@@ -145,10 +145,23 @@ void ROSflightSIL::OnUpdate(const gazebo::common::UpdateInfo& _info)
   state.omega = NWU_to_NED * vec3_to_eigen_from_gazebo(omega);
   state.t = _info.simTime.Double();
 
+//  std::cout << "GAZ OUTPUTS: " << board_.get_outputs()[0] << " "
+//                               << board_.get_outputs()[1] << " "
+//                               << board_.get_outputs()[2] << " "
+//                               << board_.get_outputs()[3] << std::endl;
+//  std::cout << "GAZ STATE: (" << state.t << ")\t" /*<< state.pos.transpose() << "\t"*/
+//            << state.rot(0,0) << "\t" << state.rot(0,1) << "\t" << state.rot(0,2) << "\t"
+//            << state.rot(1,0) << "\t" << state.rot(1,1) << "\t" << state.rot(1,2) << "\t"
+//            << state.rot(2,0) << "\t" << state.rot(2,1) << "\t" << state.rot(2,2) << "\t"
+//            << std::endl;
+//  std::cout << "GAZ STATE: (" << state.t << ")\t" << state.vel.transpose() << "\t"
+//            << state.omega.transpose() << std::endl;
   forces_ = mav_dynamics_->updateForcesAndTorques(state, board_.get_outputs());
 
   // apply the forces and torques to the joint (apply in NWU)
-  GazeboVector force = vec3_to_gazebo_from_eigen(NWU_to_NED * forces_.block<3,1>(0,0));
+//   std::cout << "GAZ F: " << (forces_.block<3,1>(0,0)).transpose() << std::endl; // ----
+//  std::cout << "GAZ T: " << (forces_.block<3,1>(3,0)).transpose() << std::endl << std::endl; // ----
+   GazeboVector force = vec3_to_gazebo_from_eigen(NWU_to_NED * forces_.block<3,1>(0,0));
   GazeboVector torque = vec3_to_gazebo_from_eigen(NWU_to_NED *  forces_.block<3,1>(3,0));
   link_->AddRelativeForce(force);
   link_->AddRelativeTorque(torque);

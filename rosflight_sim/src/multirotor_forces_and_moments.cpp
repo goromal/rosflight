@@ -129,6 +129,8 @@ Eigen::Matrix<double, 6, 1> Multirotor::updateForcesAndTorques(Current_State x, 
   // Get airspeed vector for drag force calculation (rotate wind into body frame and add to inertial velocity)
   Eigen::Vector3d Va = x.vel + x.rot.inverse()*wind_;
 
+//  std::cout << "mixed sim: " << act_cmds[0] << " " << act_cmds[1] << " " << act_cmds[2] << " " << act_cmds[3] << std::endl; // ----
+
   // Calculate Forces
   for (int i = 0; i<num_rotors_; i++)
   {

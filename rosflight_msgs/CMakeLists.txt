@@ -12,7 +12,9 @@ add_message_files(
   FILES
   OutputRaw.msg
   RCRaw.msg
+  ROSflightSimState.msg
   Command.msg
+  QuadAttCmd.msg
   Barometer.msg
   Airspeed.msg
   Attitude.msg
