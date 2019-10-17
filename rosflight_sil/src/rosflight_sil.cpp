@@ -40,9 +40,9 @@ void ROSflightSIL::Initialize()
   mav_type_ = nh_private_->param<std::string>("mav_type", "multirotor");
 
   if(mav_type_ == "multirotor")
-    mav_dynamics_ = new Multirotor(nh_private_);
+    mav_dynamics_ = new Multirotor(nh_);
   else if(mav_type_ == "fixedwing")
-    mav_dynamics_ = new Fixedwing(nh_private_);
+    mav_dynamics_ = new Fixedwing(nh_);
 
   board_.ros_setup(nh_, nh_private_, mav_type_);
 

@@ -22,9 +22,9 @@ Multirotor::Multirotor(ros::NodeHandle *nh)
     ground_effect_.push_back(85.3735);
     ground_effect_.push_back(-7.6619);
   }
-  mass_ = nh_->param<double>("mass", 2.0);
-  linear_mu_ = nh_->param<double>("linear_mu", 0.05);
-  angular_mu_ = nh_->param<double>("angular_mu", 0.0005);
+  mass_ = nh_->param<double>("uav_mass", 2.0);
+//  linear_mu_ = nh_->param<double>("linear_mu", 0.05);
+//  angular_mu_ = nh_->param<double>("angular_mu", 0.0005);
   num_rotors_ = nh_->param<int>("num_rotors", 4);
 
   std::vector<double> rotor_positions; //(3 * num_rotors_);

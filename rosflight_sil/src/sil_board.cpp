@@ -94,9 +94,9 @@ void SIL_Board::ros_setup(ros::NodeHandle* nh, ros::NodeHandle* nh_private, std:
   uniform_distribution_ = std::uniform_real_distribution<double>(-1.0, 1.0);
 
 //  gravity_ = GZ_COMPAT_GET_GRAVITY(world_);
-  gravity_(0) = nh_private_->param<double>("gravity_N", 0.0);
-  gravity_(1) = nh_private_->param<double>("gravity_E", 0.0);
-  gravity_(2) = nh_private_->param<double>("gravity_D", 9.80665);
+  gravity_(0) = 0.0; // nh_private_->param<double>("gravity_N", 0.0);
+  gravity_(1) = 0.0; // nh_private_->param<double>("gravity_E", 0.0);
+  gravity_(2) = nh_->param<double>("gravity", 9.80665);
 
   // Initialize the Sensor Biases
   gyro_bias_(0) = gyro_bias_range_*uniform_distribution_(random_generator_);
@@ -149,8 +149,13 @@ void SIL_Board::sensors_init()
 
   // Gazebo coordinates is NWU and Earth's magnetic field is defined in NED, hence the negative signs
   // ...well...not anymore.
-  double inclination = 1.14316156541;
-  double declination = 0.198584539676;
+//  double inclination = 1.14316156541;
+//  double declination = 0.198584539676;
+//  inertial_magnetic_field_(0) = sin(inclination);
+//  inertial_magnetic_field_(1) = cos(inclination)*cos(declination);
+//  inertial_magnetic_field_(2) = cos(inclination)*sin(declination);
+  double inclination = nh_private_->param<double>("inclination", 1.14316156541);
+  double declination = nh_private_->param<double>("declination", 0.198584539676);
   inertial_magnetic_field_(0) = sin(inclination);
   inertial_magnetic_field_(1) = cos(inclination)*cos(declination);
   inertial_magnetic_field_(2) = cos(inclination)*sin(declination);
@@ -177,40 +182,8 @@ bool SIL_Board::new_imu_data()
 
 bool SIL_Board::imu_read(float accel[3], float* temperature, float gyro[3], uint64_t* time_us)
 {
-  // TODO: MAKE THIS FRIENDLY TO ADDING NOISE
-
-  accel[0] = static_cast<float>(cur_imu_accel_(0));
-  accel[1] = static_cast<float>(cur_imu_accel_(1));
-  accel[2] = static_cast<float>(cur_imu_accel_(2));
-
-  (*temperature) = 27.0;
-
-  gyro[0] = static_cast<float>(cur_imu_gyro_(0));
-  gyro[1] = static_cast<float>(cur_imu_gyro_(1));
-  gyro[2] = static_cast<float>(cur_imu_gyro_(2));
-
-  (*time_us) = clock_micros();
-
-  return true;
-  /*
-  Vector3d y_acc;
-
-  // this is James' egregious hack to overcome wild imu while sitting on the ground
-  if (cur_uvw_.norm() < 0.05)
-  {
-    y_acc = cur_q_NED_UAV_.rotp(-gravity_); //    y_acc = q_I_NWU.RotateVectorReverse(-gravity_);
-//    std::cout << "SIL Y ACC (SOLO): " << y_acc.transpose() << std::endl; // ----
-  }
-  else
-  {
-    Vector3d total_acc_UAV = cur_aUAV_ + cur_pqr_.cross(cur_uvw_) - gravity_;
-//    Vector3d urot = cur_q_NED_UAV_.rotp(Vector3d(0.,0.,1.)); // ----
-    y_acc = cur_q_NED_UAV_.rotp(total_acc_UAV);
-//    std::cout << "SIL QUAT: " << cur_q_NED_UAV_.w() << "\t" << cur_q_NED_UAV_.x() << "\t" << cur_q_NED_UAV_.y() << "\t" << cur_q_NED_UAV_.z() << std::endl; // ----
-//    std::cout << "SIL OPND: " << total_acc_UAV(0) << "\t" << total_acc_UAV(1) << "\t" << total_acc_UAV(2) << std::endl; // ----
-//    std::cout << "SIL UROT: " << urot(0) << "\t" << urot(1) << "\t" << urot(2) << std::endl; // ----
-//    std::cout << "SIL REST: " << y_acc(0) << "\t" << y_acc(1) << "\t" << y_acc(2) << std::endl; // ----
-  }
+    // ACCELS MEASUREMENT
+  Vector3d y_acc = cur_imu_accel_;
 
   // Apply normal noise (only if armed, because most of the noise comes from motors
   if (motors_spinning())
@@ -228,13 +201,15 @@ bool SIL_Board::imu_read(float accel[3], float* temperature, float gyro[3], uint
   // Add constant Bias to measurement
   y_acc += acc_bias_;
 
-  // Convert to NED for output...or not...
-  accel[0] = y_acc(0);
-  accel[1] = y_acc(1);
-  accel[2] = y_acc(2);
+  // Output accels
+  accel[0] = static_cast<float>(y_acc(0));
+  accel[1] = static_cast<float>(y_acc(1));
+  accel[2] = static_cast<float>(y_acc(2));
 
-//  GazeboVector y_gyro = GZ_COMPAT_GET_RELATIVE_ANGULAR_VEL(link_);
-  Vector3d y_gyro(cur_pqr_);
+  (*temperature) = 27.0;
+
+  // GYROS MEASUREMENT
+  Vector3d y_gyro = cur_imu_gyro_;
 
   // Normal Noise from motors
   if (motors_spinning())
@@ -252,14 +227,14 @@ bool SIL_Board::imu_read(float accel[3], float* temperature, float gyro[3], uint
   // Apply Constant Bias
   y_gyro += gyro_bias_;
 
-  // Convert to NED for output...or not..
-  gyro[0] = y_gyro(0);
-  gyro[1] = y_gyro(1);
-  gyro[2] = y_gyro(2);
+  // Output gyros
+  gyro[0] = static_cast<float>(y_gyro(0));
+  gyro[1] = static_cast<float>(y_gyro(1));
+  gyro[2] = static_cast<float>(y_gyro(2));
 
-  (*temperature) = 27.0;
   (*time_us) = clock_micros();
-  return true;*/
+
+  return true;
 }
 
 void SIL_Board::imu_not_responding_error(void)
