@@ -36,8 +36,6 @@
 
 #include <rosflight/mavrosflight/time_manager.h>
 
-//#include <iostream> // ----
-
 namespace mavrosflight
 {
 
@@ -57,8 +55,6 @@ TimeManager::TimeManager(MavlinkComm *comm) :
 void TimeManager::handle_mavlink_message(const mavlink_message_t &msg)
 {
   int64_t now_ns = ros::Time::now().toNSec();
-
-//  std::cout << "ROS NOW NS: " << now_ns << std::endl;
 
   if (msg.msgid == MAVLINK_MSG_ID_TIMESYNC)
   {

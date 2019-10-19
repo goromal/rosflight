@@ -129,7 +129,7 @@ private:
   void handle_hard_error_msg(const mavlink_message_t &msg);
 
   // ROS message callbacks
-  void aclCommandCallback(rosflight_msgs::QuadAttCmdConstPtr msg);
+  void attRateCommandCallback(rosflight_msgs::QuadAttCmdConstPtr msg);
   void commandCallback(rosflight_msgs::Command::ConstPtr msg);
   void auxCommandCallback(rosflight_msgs::AuxCommand::ConstPtr msg);
   void attitudeCorrectionCallback(geometry_msgs::Quaternion::ConstPtr msg);
