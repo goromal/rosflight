@@ -169,7 +169,7 @@ public:
 
   // Gazebo stuff
   void ros_setup(ros::NodeHandle* nh, ros::NodeHandle* nh_private, std::string mav_type);
-  inline const int* get_outputs() const { return pwm_outputs_; }
+  inline int* get_outputs() { return pwm_outputs_; }
 };
 
 } // end namespace rosflight_sil

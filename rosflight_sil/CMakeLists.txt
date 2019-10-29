@@ -41,8 +41,8 @@ add_executable(rosflight_sil_node
   src/rosflight_sil.cpp
   src/sil_board.cpp
   src/rosflight_sil_node.cpp
-  src/fixedwing_forces_and_moments.cpp
-  src/multirotor_forces_and_moments.cpp
+#  src/fixedwing_forces_and_moments.cpp
+#  src/multirotor_forces_and_moments.cpp
 )
 target_link_libraries(rosflight_sil_node utils ${catkin_LIBRARIES})
 

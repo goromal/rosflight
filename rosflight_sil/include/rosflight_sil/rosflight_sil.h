@@ -3,10 +3,11 @@
 #include <ros/ros.h>
 #include <geometry_msgs/Wrench.h>
 #include "rosflight_msgs/ROSflightSimState.h"
+#include <std_msgs/Int32MultiArray.h>
 #include <rosflight.h>
-#include "mav_forces_and_moments.h"
-#include "fixedwing_forces_and_moments.h"
-#include "multirotor_forces_and_moments.h"
+//#include "mav_forces_and_moments.h"
+//#include "fixedwing_forces_and_moments.h"
+//#include "multirotor_forces_and_moments.h"
 #include "sil_board.h"
 #include <mavlink/mavlink.h>
 
@@ -34,14 +35,16 @@ private:
   ros::Timer timer_;
 
   ros::Subscriber truth_NED_sub_;
-  ros::Publisher motor_forces_pub_;
+  ros::Publisher motor_pwm_pub_;
 
-  MAVForcesAndMoments* mav_dynamics_;
-  MAVForcesAndMoments::Current_State current_state_;
-  geometry_msgs::Wrench motor_forces_msg_;
+//  ros::Publisher motor_forces_pub_;
+
+//  MAVForcesAndMoments* mav_dynamics_;
+//  MAVForcesAndMoments::Current_State current_state_;
+//  geometry_msgs::Wrench motor_forces_msg_;
 
   // container for forces
-  Eigen::Matrix<double, 6, 1> motor_forces_;
+//  Eigen::Matrix<double, 6, 1> motor_forces_;
 
   bool truth_received_;
 
