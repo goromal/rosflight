@@ -942,7 +942,10 @@ void rosflightIO::paramTimerCallback(const ros::TimerEvent &e)
   if (mavrosflight_->param.got_all_params())
   {
     param_timer_.stop();
-    ROS_INFO("Received all parameters");
+    ROS_INFO("Received all parameters. Calibrating IMU...");
+    mavlink_message_t msg;
+    mavlink_msg_rosflight_cmd_pack(1, 50, &msg, ROSFLIGHT_CMD_ACCEL_CALIBRATION);
+    mavrosflight_->comm.send_message(msg);
   }
   else
   {
